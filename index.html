@@ -8,45 +8,121 @@
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #17212b;
-      color: #e1e5e9;
+      background: var(--tg-theme-bg-color, #17212b);
+      color: var(--tg-theme-text-color, #e1e5e9);
       margin: 0;
-      padding: 24px;
-      min-height: 100vh;
+      padding: 16px;
     }
-    h1 { font-size: 22px; margin-bottom: 8px; }
+    h1 { font-size: 20px; margin-bottom: 16px; text-align: center; }
+    
+    .tabs { display: flex; margin-bottom: 16px; background: var(--tg-theme-secondary-bg-color, #232e3c); border-radius: 8px; padding: 4px; }
+    .tab { flex: 1; text-align: center; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .tab.active { background: var(--tg-theme-button-color, #5288c1); color: var(--tg-theme-button-text-color, #ffffff); font-weight: bold; }
+    
     .card {
-      background: #232e3c;
+      background: var(--tg-theme-secondary-bg-color, #232e3c);
       border-radius: 12px;
       padding: 16px;
-      margin-top: 16px;
+      margin-bottom: 12px;
     }
-    .hint { color: #7d8b99; font-size: 14px; }
-    #user { color: #64b5f6; font-weight: 600; }
+    .title { font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #64b5f6; }
+    .info-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; color: #7d8b99; }
+    .info-val { color: var(--tg-theme-text-color, #e1e5e9); }
+    .status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-top: 8px; }
+    .status-taken { background: #f39c12; color: #000; }
+    .status-completed { background: #2ecc71; color: #000; }
+    
+    #loading { text-align: center; margin-top: 20px; color: #7d8b99; }
+    .empty { text-align: center; color: #7d8b99; margin-top: 20px; }
   </style>
 </head>
 <body>
   <h1>🎬 Anima Tasks</h1>
-  <p class="hint">Заглушка MiniApp. Скоро здесь будут таблицы и сценарии.</p>
-  <div class="card">
-    <p>Привет, <span id="user">гость</span>!</p>
-    <p class="hint" id="status">Инициализация Telegram WebApp...</p>
+  
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('my')">Мои ролики</div>
+    <div class="tab" onclick="switchTab('all')">Все аниматоры</div>
   </div>
+
+  <div id="content">
+    <div id="loading">Загрузка данных...</div>
+  </div>
+
   <script>
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      tg.ready();
-      tg.expand();
-      const user = tg.initDataUnsafe?.user;
-      if (user) {
-        document.getElementById('user').textContent = user.first_name || user.username || 'аниматор';
-        document.getElementById('status').textContent = 'Telegram WebApp успешно подключён. User ID: ' + user.id;
-      } else {
-        document.getElementById('status').textContent = 'Открыто вне Telegram (user не передан).';
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    const userId = tg.initDataUnsafe?.user?.id;
+    // ВАЖНО: Замени этот адрес на тот, который выдаст тебе ngrok или localtunnel
+    const API_URL = "http://127.0.0.1:8000"; 
+
+    async function loadMyScenarios() {
+      if (!userId) {
+        document.getElementById('content').innerHTML = '<div class="empty">Ошибка: не удалось получить ваш ID.</div>';
+        return;
       }
-    } else {
-      document.getElementById('status').textContent = 'Telegram WebApp SDK не загружен.';
+
+      try {
+        const response = await fetch(`${API_URL}/api/my_scenarios/${userId}`);
+        const data = await response.json();
+        renderScenarios(data.scenarios);
+      } catch (e) {
+        document.getElementById('content').innerHTML = '<div class="empty">Ошибка загрузки. Проверьте соединение.</div>';
+      }
     }
+
+    async function loadAllAnimators() {
+      try {
+        const response = await fetch(`${API_URL}/api/all_animators`);
+        const data = await response.json();
+        let html = '';
+        if (data.animators.length === 0) {
+            html = '<div class="empty">Пока никто не брал ролики.</div>';
+        } else {
+            data.animators.forEach(id => {
+                html += `<div class="card">Аниматор ID: ${id}</div>`;
+            });
+        }
+        document.getElementById('content').innerHTML = html;
+      } catch (e) {
+        document.getElementById('content').innerHTML = '<div class="empty">Ошибка загрузки.</div>';
+      }
+    }
+
+    function renderScenarios(scenarios) {
+      if (scenarios.length === 0) {
+        document.getElementById('content').innerHTML = '<div class="empty">У вас пока нет роликов.</div>';
+        return;
+      }
+
+      let html = '';
+      scenarios.forEach(s => {
+        const statusClass = s.status === 'completed' ? 'status-completed' : 'status-taken';
+        const statusText = s.status === 'completed' ? 'Завершено' : 'В работе';
+        
+        html += `
+          <div class="card">
+            <div class="title">${s.title}</div>
+            <div class="info-row"><span>Дата выбора:</span> <span class="info-val">${s.selected_at}</span></div>
+            <div class="info-row"><span>Дата завершения:</span> <span class="info-val">${s.completed_at}</span></div>
+            <div class="status ${statusClass}">${statusText}</div>
+          </div>
+        `;
+      });
+      document.getElementById('content').innerHTML = html;
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      if (tab === 'my') loadMyScenarios();
+      if (tab === 'all') loadAllAnimators();
+    }
+
+    // Загружаем "Мои ролики" при старте
+    loadMyScenarios();
   </script>
 </body>
 </html>
