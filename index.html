@@ -12,44 +12,117 @@
       color: var(--tg-theme-text-color, #e1e5e9);
       margin: 0;
       padding: 16px;
+      padding-bottom: 80px; /* Отступ для нижнего меню */
     }
     h1 { font-size: 20px; margin-bottom: 16px; text-align: center; }
     
-    .tabs { display: flex; margin-bottom: 16px; background: var(--tg-theme-secondary-bg-color, #232e3c); border-radius: 8px; padding: 4px; }
-    .tab { flex: 1; text-align: center; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 13px; }
-    .tab.active { background: var(--tg-theme-button-color, #5288c1); color: var(--tg-theme-button-text-color, #ffffff); font-weight: bold; }
-    
-    .card {
+    /* Стили карточек сценариев */
+    .scenario-card {
       background: var(--tg-theme-secondary-bg-color, #232e3c);
       border-radius: 12px;
-      padding: 16px;
       margin-bottom: 12px;
+      overflow: hidden;
     }
-    .title { font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #64b5f6; }
-    .desc { font-size: 13px; margin-bottom: 12px; color: #7d8b99; }
-    .info-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; color: #7d8b99; }
-    .info-val { color: var(--tg-theme-text-color, #e1e5e9); }
     
-    .status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-top: 8px; }
-    .status-free { background: #2ecc71; color: #000; }
-    .status-taken { background: #f39c12; color: #000; }
+    .scenario-header {
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      font-size: 16px;
+      color: #64b5f6;
+      transition: background 0.2s;
+    }
+    
+    .scenario-header:hover { background: rgba(255,255,255,0.05); }
+    
+    .status-badge {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      color: #000;
+      font-weight: bold;
+    }
+    .status-free { background: #2ecc71; }
+    .status-taken { background: #f39c12; }
     .status-completed { background: #7d8b99; color: #fff; }
     
+    .scenario-body {
+      display: none;
+      padding: 0 16px 16px 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .scenario-body.open { display: block; }
+    
+    .desc { font-size: 14px; margin-top: 12px; margin-bottom: 16px; line-height: 1.4; }
+    
+    .scene-block {
+      margin-bottom: 16px;
+      padding-left: 12px;
+      border-left: 2px solid #5288c1;
+    }
+    .scene-title { font-weight: bold; font-size: 14px; color: #f39c12; margin-bottom: 4px; }
+    .scene-text { font-size: 13px; color: #a0aab5; margin-bottom: 8px; }
+    .scene-photo { max-width: 100%; border-radius: 8px; margin-top: 8px; }
+    
+    /* Нижняя навигация */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--tg-theme-secondary-bg-color, #232e3c);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .nav-btn {
+      background: none;
+      border: none;
+      color: #7d8b99;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+    .nav-btn.active {
+      color: #64b5f6;
+      font-weight: bold;
+      background: rgba(100, 181, 246, 0.1);
+    }
+
     #loading { text-align: center; margin-top: 20px; color: #7d8b99; }
     .empty { text-align: center; color: #7d8b99; margin-top: 20px; }
   </style>
 </head>
 <body>
   <h1>🎬 Anima Tasks</h1>
-  
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('scenarios')">Сценарии</div>
-    <div class="tab" onclick="switchTab('my')">Мои ролики</div>
-    <div class="tab" onclick="switchTab('all')">Все аниматоры</div>
+
+  <!-- Основной экран: Сценарии -->
+  <div id="scenarios-screen">
+    <div id="scenarios-list">
+      <div id="loading">Загрузка данных...</div>
+    </div>
   </div>
 
-  <div id="content">
-    <div id="loading">Загрузка данных...</div>
+  <!-- Экран: Мои ролики -->
+  <div id="my-screen" style="display: none;">
+    <div id="my-list"></div>
+  </div>
+
+  <!-- Экран: Все аниматоры -->
+  <div id="all-screen" style="display: none;">
+    <div id="all-list"></div>
+  </div>
+
+  <!-- Нижняя навигация -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="switchScreen('scenarios')">📚 Сценарии</button>
+    <button class="nav-btn" onclick="switchScreen('my')">🎞 Мои ролики</button>
+    <button class="nav-btn" onclick="switchScreen('all')">👥 Аниматоры</button>
   </div>
 
   <script>
@@ -61,105 +134,157 @@
     // ВАЖНО: Замени на свою ссылку Railway!
     const API_URL = "https://твоя-ссылка.up.railway.app"; 
 
+    // Загрузка сценариев
     async function loadScenarios() {
+      document.getElementById('loading').style.display = 'block';
       try {
         const response = await fetch(`${API_URL}/api/scenarios`);
         const data = await response.json();
         renderScenarios(data.scenarios);
       } catch (e) {
-        document.getElementById('content').innerHTML = '<div class="empty">Ошибка загрузки.</div>';
+        document.getElementById('scenarios-list').innerHTML = '<div class="empty">Ошибка загрузки.</div>';
       }
     }
 
-    async function loadMyScenarios() {
-      if (!userId) {
-        document.getElementById('content').innerHTML = '<div class="empty">Ошибка: не удалось получить ваш ID.</div>';
+    function renderScenarios(scenarios) {
+      const list = document.getElementById('scenarios-list');
+      list.innerHTML = '';
+      
+      if (scenarios.length === 0) {
+        list.innerHTML = '<div class="empty">Пока нет сценариев.</div>';
         return;
       }
+
+      scenarios.forEach(s => {
+        let badgeClass = 'status-free';
+        let badgeText = 'Свободен';
+        if (s.status === 'taken') { badgeClass = 'status-taken'; badgeText = 'Занят'; }
+        if (s.status === 'completed') { badgeClass = 'status-completed'; badgeText = 'Завершен'; }
+
+        // Генерируем HTML для сцен
+        let scenesHtml = '';
+        if (s.scenes && s.scenes.length > 0) {
+          s.scenes.forEach((scene, idx) => {
+            // Для фото используем file_id. В MiniApp нужно будет обращаться к Telegram Bot API,
+            // но пока мы просто выведем текстовое описание. Позже сделаем прокси.
+            scenesHtml += `
+              <div class="scene-block">
+                <div class="scene-title">Сцена ${idx + 1}</div>
+                <div class="scene-text">${scene.text}</div>
+                ${scene.photo ? `<div style="font-size:12px; color:#5288c1;">📸 [Фото добавлено]</div>` : ''}
+              </div>
+            `;
+          });
+        } else {
+          scenesHtml = '<div class="scene-text">Нет сцен.</div>';
+        }
+
+        const card = document.createElement('div');
+        card.className = 'scenario-card';
+        card.innerHTML = `
+          <div class="scenario-header" onclick="toggleScenario(this)">
+            <span>${s.title}</span>
+            <span class="status-badge ${badgeClass}">${badgeText}</span>
+          </div>
+          <div class="scenario-body">
+            <div class="desc">${s.description || 'Без описания'}</div>
+            ${scenesHtml}
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function toggleScenario(header) {
+      const body = header.nextElementSibling;
+      body.classList.toggle('open');
+    }
+
+    // Загрузка "Мои ролики"
+    async function loadMyScenarios() {
+      if (!userId) return;
       try {
         const response = await fetch(`${API_URL}/api/my_scenarios/${userId}`);
         const data = await response.json();
         renderMyScenarios(data.scenarios);
       } catch (e) {
-        document.getElementById('content').innerHTML = '<div class="empty">Ошибка загрузки.</div>';
+        document.getElementById('my-list').innerHTML = '<div class="empty">Ошибка загрузки.</div>';
       }
-    }
-
-    async function loadAllAnimators() {
-      try {
-        const response = await fetch(`${API_URL}/api/all_animators`);
-        const data = await response.json();
-        let html = '';
-        if (data.animators.length === 0) {
-            html = '<div class="empty">Пока никто не брал ролики.</div>';
-        } else {
-            data.animators.forEach(id => {
-                html += `<div class="card">Аниматор ID: ${id}</div>`;
-            });
-        }
-        document.getElementById('content').innerHTML = html;
-      } catch (e) {
-        document.getElementById('content').innerHTML = '<div class="empty">Ошибка загрузки.</div>';
-      }
-    }
-
-    function renderScenarios(scenarios) {
-      if (scenarios.length === 0) {
-        document.getElementById('content').innerHTML = '<div class="empty">Пока нет созданных сценариев.</div>';
-        return;
-      }
-
-      let html = '';
-      scenarios.forEach(s => {
-        let statusText = 'Свободен';
-        let statusClass = 'status-free';
-        if (s.status === 'taken') { statusText = 'В работе'; statusClass = 'status-taken'; }
-        if (s.status === 'completed') { statusText = 'Завершено'; statusClass = 'status-completed'; }
-
-        html += `
-          <div class="card">
-            <div class="title">${s.title}</div>
-            <div class="desc">${s.description || 'Без описания'}</div>
-            <div class="status ${statusClass}">${statusText}</div>
-          </div>
-        `;
-      });
-      document.getElementById('content').innerHTML = html;
     }
 
     function renderMyScenarios(scenarios) {
+      const list = document.getElementById('my-list');
       if (scenarios.length === 0) {
-        document.getElementById('content').innerHTML = '<div class="empty">У вас пока нет роликов.</div>';
+        list.innerHTML = '<div class="empty">У вас пока нет роликов.</div>';
         return;
       }
-
       let html = '';
       scenarios.forEach(s => {
         const statusClass = s.status === 'completed' ? 'status-completed' : 'status-taken';
         const statusText = s.status === 'completed' ? 'Завершено' : 'В работе';
-        
         html += `
-          <div class="card">
-            <div class="title">${s.title}</div>
-            <div class="info-row"><span>Дата выбора:</span> <span class="info-val">${s.selected_at}</span></div>
-            <div class="info-row"><span>Дата завершения:</span> <span class="info-val">${s.completed_at}</span></div>
-            <div class="status ${statusClass}">${statusText}</div>
+          <div class="scenario-card">
+            <div class="scenario-header">
+              <span>${s.title}</span>
+              <span class="status-badge ${statusClass}">${statusText}</span>
+            </div>
+            <div class="scenario-body open" style="padding-top:12px;">
+              <div class="info-row"><span>Дата выбора:</span> <span>${s.selected_at}</span></div>
+              <div class="info-row"><span>Дата завершения:</span> <span>${s.completed_at}</span></div>
+            </div>
           </div>
         `;
       });
-      document.getElementById('content').innerHTML = html;
+      list.innerHTML = html;
     }
 
-    function switchTab(tab) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      event.target.classList.add('active');
+    // Загрузка "Все аниматоры"
+    async function loadAllAnimators() {
+      try {
+        const response = await fetch(`${API_URL}/api/all_animators`);
+        const data = await response.json();
+        const list = document.getElementById('all-list');
+        if (data.animators.length === 0) {
+          list.innerHTML = '<div class="empty">Пока никто не брал ролики.</div>';
+        } else {
+          let html = '';
+          data.animators.forEach(id => {
+            html += `<div class="scenario-card" style="padding:16px;">Аниматор ID: ${id}</div>`;
+          });
+          list.innerHTML = html;
+        }
+      } catch (e) {
+        document.getElementById('all-list').innerHTML = '<div class="empty">Ошибка загрузки.</div>';
+      }
+    }
+
+    // Переключение экранов
+    function switchScreen(screenName) {
+      // Скрываем все экраны
+      document.getElementById('scenarios-screen').style.display = 'none';
+      document.getElementById('my-screen').style.display = 'none';
+      document.getElementById('all-screen').style.display = 'none';
       
-      if (tab === 'scenarios') loadScenarios();
-      if (tab === 'my') loadMyScenarios();
-      if (tab === 'all') loadAllAnimators();
+      // Убираем активный класс со всех кнопок
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+      // Показываем нужный экран и кнопку
+      if (screenName === 'scenarios') {
+        document.getElementById('scenarios-screen').style.display = 'block';
+        document.querySelectorAll('.nav-btn')[0].classList.add('active');
+        loadScenarios();
+      } else if (screenName === 'my') {
+        document.getElementById('my-screen').style.display = 'block';
+        document.querySelectorAll('.nav-btn')[1].classList.add('active');
+        loadMyScenarios();
+      } else if (screenName === 'all') {
+        document.getElementById('all-screen').style.display = 'block';
+        document.querySelectorAll('.nav-btn')[2].classList.add('active');
+        loadAllAnimators();
+      }
     }
 
-    // Загружаем "Сценарии" при старте
+    // Загружаем сценарии при старте
     loadScenarios();
   </script>
 </body>
