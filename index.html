@@ -71,7 +71,7 @@
   <div class="bottom-nav">
     <button class="nav-btn active" onclick="switchScreen('scenarios')">📚 Сценарии</button>
     <button class="nav-btn" onclick="switchScreen('my')">🎞 Мои ролики</button>
-    <button class="nav-btn" onclick="switchScreen('all')">👥 Аниматоры</button>
+    <button class="nav-btn" onclick="switchScreen('users')">👥 Участники</button>
   </div>
 
   <div id="imageModal" class="modal-overlay" onclick="closeImage()">
@@ -208,7 +208,6 @@
         const list = document.getElementById('my-list');
         if (data.scenarios.length === 0) { list.innerHTML = '<div class="empty">У вас пока нет роликов.</div>'; return; }
         
-        // Группируем по периодам
         const grouped = {};
         data.scenarios.forEach(s => {
             if (!grouped[s.period]) grouped[s.period] = [];
@@ -216,7 +215,6 @@
         });
 
         let html = '';
-        // Сортируем периоды (по убыванию даты, просто для красоты)
         const sortedPeriods = Object.keys(grouped).sort().reverse();
         
         sortedPeriods.forEach(period => {
@@ -243,14 +241,32 @@
       } catch (e) { document.getElementById('my-list').innerHTML = '<div class="empty">Ошибка загрузки.</div>'; }
     }
 
-    async function loadAllAnimators() {
+    async function loadUsers() {
       try {
-        const response = await fetch(`${API_URL}/api/all_animators`);
+        const response = await fetch(`${API_URL}/api/users`);
         const data = await response.json();
         const list = document.getElementById('all-list');
-        if (data.animators.length === 0) { list.innerHTML = '<div class="empty">Пока никто не брал ролики.</div>'; return; }
+        if (data.users.length === 0) { list.innerHTML = '<div class="empty">Пока нет участников.</div>'; return; }
+        
         let html = '';
-        data.animators.forEach(id => { html += `<div class="scenario-card" style="padding:16px;">Аниматор ID: ${id}</div>`; });
+        data.users.forEach(u => {
+            let roleText = 'Аниматор';
+            if (u.role === 'admin') roleText = 'Админ';
+            if (u.role === 'scenarist') roleText = 'Сценарист';
+            
+            html += `
+                <div class="scenario-card" style="padding:16px; display:flex; align-items:center; gap:12px;">
+                    <div style="flex-shrink:0;">
+                        <img src="${API_URL}/api/avatar/${u.id}" style="width:48px; height:48px; border-radius:50%; object-fit:cover;" onerror="this.src='https://via.placeholder.com/48?text=👤'">
+                    </div>
+                    <div style="flex-grow:1;">
+                        <div style="font-weight:bold; font-size:15px;">${u.first_name || u.username || 'Без имени'}</div>
+                        <div style="font-size:12px; color:#7d8b99; margin-top:2px;">${roleText}</div>
+                    </div>
+                    ${u.username ? `<a href="https://t.me/${u.username}" target="_blank" style="background:#3498db; color:#fff; text-decoration:none; padding:8px 12px; border-radius:6px; font-size:13px;">Написать</a>` : ''}
+                </div>
+            `;
+        });
         list.innerHTML = html;
       } catch (e) { document.getElementById('all-list').innerHTML = '<div class="empty">Ошибка загрузки.</div>'; }
     }
@@ -269,10 +285,10 @@
         document.getElementById('my-screen').style.display = 'block';
         document.querySelectorAll('.nav-btn')[1].classList.add('active');
         loadMyScenarios();
-      } else if (screenName === 'all') {
+      } else if (screenName === 'users') {
         document.getElementById('all-screen').style.display = 'block';
         document.querySelectorAll('.nav-btn')[2].classList.add('active');
-        loadAllAnimators();
+        loadUsers();
       }
     }
 
