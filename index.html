@@ -41,8 +41,8 @@
 
     .audio-download-btn {
       display: inline-block; padding: 10px 16px; background: #3498db; color: #fff;
-      text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;
-      text-align: center; margin-top: 8px;
+      border: none; border-radius: 8px; font-weight: bold; font-size: 14px;
+      text-align: center; margin-top: 8px; cursor: pointer;
     }
     .audio-download-btn:active { background: #2980b9; }
 
@@ -79,8 +79,8 @@
     const tg = window.Telegram.WebApp;
     tg.ready(); tg.expand();
     const userId = tg.initDataUnsafe?.user?.id;
-    // ВАЖНО: Замени на свою ссылку Railway!
-    const API_URL = "https://anima-bot-production.up.railway.app";
+    // ВАЖНО: Твоя ссылка на Railway
+    const API_URL = "https://anima-bot-production.up.railway.app"; 
 
     async function loadScenarios() {
       try {
@@ -117,7 +117,7 @@
 
         let audioHtml = '';
         if (s.audio_id) {
-            audioHtml = `<div style="margin-top:16px;"><a href="${API_URL}/api/audio/${s.audio_id}" download class="audio-download-btn">⬇️ Скачать аудио</a></div>`;
+            audioHtml = `<div style="margin-top:16px;"><button onclick="downloadAudio('${s.audio_id}')" class="audio-download-btn">⬇️ Скачать аудио</button></div>`;
         }
 
         let selectBtnHtml = '';
@@ -158,6 +158,21 @@
                 loadScenarios();
             }
         } catch (e) { tg.showAlert("Ошибка соединения с сервером"); }
+    }
+
+    function downloadAudio(fileId) {
+        const fileUrl = `${API_URL}/api/audio/${fileId}`;
+        const fileName = `audio_${fileId}.mp3`;
+
+        if (window.Telegram?.WebApp?.downloadFile) {
+            window.Telegram.WebApp.downloadFile({
+                url: fileUrl,
+                file_name: fileName
+            });
+        } else {
+            // Запасной вариант для старых версий Telegram
+            window.open(fileUrl, '_blank');
+        }
     }
 
     function toggleScenario(header) { header.nextElementSibling.classList.toggle('open'); }
