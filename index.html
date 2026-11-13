@@ -10,175 +10,79 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: var(--tg-theme-bg-color, #17212b);
       color: var(--tg-theme-text-color, #e1e5e9);
-      margin: 0;
-      padding: 16px;
-      padding-bottom: 80px; /* Отступ для нижнего меню */
+      margin: 0; padding: 16px; padding-bottom: 80px;
     }
     h1 { font-size: 20px; margin-bottom: 16px; text-align: center; }
     
-    /* Стили карточек сценариев */
-    .scenario-card {
-      background: var(--tg-theme-secondary-bg-color, #232e3c);
-      border-radius: 12px;
-      margin-bottom: 12px;
-      overflow: hidden;
-    }
-    
-    .scenario-header {
-      padding: 16px;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: bold;
-      font-size: 16px;
-      color: #64b5f6;
-      transition: background 0.2s;
-    }
-    
+    .scenario-card { background: var(--tg-theme-secondary-bg-color, #232e3c); border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+    .scenario-header { padding: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 16px; color: #64b5f6; }
     .scenario-header:hover { background: rgba(255,255,255,0.05); }
     
-    .status-badge {
-      font-size: 11px;
-      padding: 4px 8px;
-      border-radius: 6px;
-      color: #000;
-      font-weight: bold;
-      white-space: nowrap;
-      margin-left: 10px;
-    }
+    .status-badge { font-size: 11px; padding: 4px 8px; border-radius: 6px; color: #000; font-weight: bold; margin-left: 10px; white-space: nowrap; }
     .status-free { background: #2ecc71; }
     .status-taken { background: #f39c12; }
     .status-completed { background: #7d8b99; color: #fff; }
     
-    .scenario-body {
-      display: none;
-      padding: 0 16px 16px 16px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
+    .scenario-body { display: none; padding: 0 16px 16px 16px; border-top: 1px solid rgba(255,255,255,0.1); }
     .scenario-body.open { display: block; }
     
     .desc { font-size: 14px; margin-top: 12px; margin-bottom: 16px; line-height: 1.4; }
-    
-    .scene-block {
-      margin-bottom: 16px;
-      padding-left: 12px;
-      border-left: 2px solid #5288c1;
-    }
+    .scene-block { margin-bottom: 16px; padding-left: 12px; border-left: 2px solid #5288c1; }
     .scene-title { font-weight: bold; font-size: 14px; color: #f39c12; margin-bottom: 4px; }
     .scene-text { font-size: 13px; color: #a0aab5; margin-bottom: 8px; }
     
-    /* Стили для миниатюры */
-    .scene-thumb {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 6px;
-      margin-top: 8px;
-      cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.2);
-      transition: transform 0.2s;
-    }
-    .scene-thumb:hover {
-      transform: scale(1.05);
-    }
-
-    /* Стили для модального окна с фото */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.9);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-    .modal-overlay.active {
-      display: flex;
-    }
-    .modal-img {
-      max-width: 100%;
-      max-height: 90vh;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
+    .scene-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; margin-top: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
     
-    /* Нижняя навигация */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--tg-theme-secondary-bg-color, #232e3c);
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 0;
-      border-top: 1px solid rgba(255,255,255,0.1);
+    .select-btn {
+      display: block; width: 100%; padding: 12px; margin-top: 16px; background: #2ecc71; color: #000;
+      border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-align: center;
     }
-    .nav-btn {
-      background: none;
-      border: none;
-      color: #7d8b99;
-      font-size: 14px;
-      cursor: pointer;
-      padding: 8px 16px;
-      border-radius: 8px;
-    }
-    .nav-btn.active {
-      color: #64b5f6;
-      font-weight: bold;
-      background: rgba(100, 181, 246, 0.1);
-    }
+    .select-btn:active { background: #27ae60; }
 
-    #loading { text-align: center; margin-top: 20px; color: #7d8b99; }
+    .audio-download-btn {
+      display: inline-block; padding: 10px 16px; background: #3498db; color: #fff;
+      text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;
+      text-align: center; margin-top: 8px;
+    }
+    .audio-download-btn:active { background: #2980b9; }
+
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.9); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+    .modal-overlay.active { display: flex; }
+    .modal-img { max-width: 100%; max-height: 90vh; border-radius: 8px; }
+    
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--tg-theme-secondary-bg-color, #232e3c); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.1); }
+    .nav-btn { background: none; border: none; color: #7d8b99; font-size: 14px; cursor: pointer; padding: 8px 16px; border-radius: 8px; }
+    .nav-btn.active { color: #64b5f6; font-weight: bold; background: rgba(100, 181, 246, 0.1); }
     .empty { text-align: center; color: #7d8b99; margin-top: 20px; }
   </style>
 </head>
 <body>
   <h1>🎬 Anima Tasks</h1>
 
-  <!-- Основной экран: Сценарии -->
   <div id="scenarios-screen">
-    <div id="scenarios-list">
-      <div id="loading">Загрузка данных...</div>
-    </div>
+    <div id="scenarios-list"><div class="empty">Загрузка...</div></div>
   </div>
+  <div id="my-screen" style="display: none;"><div id="my-list"></div></div>
+  <div id="all-screen" style="display: none;"><div id="all-list"></div></div>
 
-  <!-- Экран: Мои ролики -->
-  <div id="my-screen" style="display: none;">
-    <div id="my-list"></div>
-  </div>
-
-  <!-- Экран: Все аниматоры -->
-  <div id="all-screen" style="display: none;">
-    <div id="all-list"></div>
-  </div>
-
-  <!-- Нижняя навигация -->
   <div class="bottom-nav">
     <button class="nav-btn active" onclick="switchScreen('scenarios')">📚 Сценарии</button>
     <button class="nav-btn" onclick="switchScreen('my')">🎞 Мои ролики</button>
     <button class="nav-btn" onclick="switchScreen('all')">👥 Аниматоры</button>
   </div>
 
-  <!-- Модальное окно для просмотра фото -->
   <div id="imageModal" class="modal-overlay" onclick="closeImage()">
-    <img id="modalImage" class="modal-img" src="" alt="Фото">
+    <img id="modalImage" class="modal-img" src="">
   </div>
 
   <script>
     const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-
+    tg.ready(); tg.expand();
     const userId = tg.initDataUnsafe?.user?.id;
     // ВАЖНО: Замени на свою ссылку Railway!
-    const API_URL = "https://anima-bot-production.up.railway.app"; 
+    const API_URL = "https://твоя-ссылка.up.railway.app"; 
 
-    // Загрузка сценариев
     async function loadScenarios() {
-      document.getElementById('loading').style.display = 'block';
       try {
         const response = await fetch(`${API_URL}/api/scenarios`);
         const data = await response.json();
@@ -191,19 +95,13 @@
     function renderScenarios(scenarios) {
       const list = document.getElementById('scenarios-list');
       list.innerHTML = '';
-      
-      if (scenarios.length === 0) {
-        list.innerHTML = '<div class="empty">Пока нет сценариев.</div>';
-        return;
-      }
+      if (scenarios.length === 0) { list.innerHTML = '<div class="empty">Пока нет сценариев.</div>'; return; }
 
       scenarios.forEach(s => {
-        let badgeClass = 'status-free';
-        let badgeText = 'Свободен';
+        let badgeClass = 'status-free'; let badgeText = 'Свободен';
         if (s.status === 'taken') { badgeClass = 'status-taken'; badgeText = 'Занят'; }
         if (s.status === 'completed') { badgeClass = 'status-completed'; badgeText = 'Завершен'; }
 
-        // Генерируем HTML для сцен
         let scenesHtml = '';
         if (s.scenes && s.scenes.length > 0) {
           s.scenes.forEach((scene, idx) => {
@@ -215,8 +113,18 @@
               </div>
             `;
           });
-        } else {
-          scenesHtml = '<div class="scene-text">Нет сцен.</div>';
+        }
+
+        let audioHtml = '';
+        if (s.audio_id) {
+            audioHtml = `<div style="margin-top:16px;"><a href="${API_URL}/api/audio/${s.audio_id}" download class="audio-download-btn">⬇️ Скачать аудио</a></div>`;
+        }
+
+        let selectBtnHtml = '';
+        if (s.status === 'free') {
+            selectBtnHtml = `<button class="select-btn" onclick="selectScenario(${s.id})">✅ Выбрать этот сценарий</button>`;
+        } else if (s.animator_id === userId && s.status === 'taken') {
+            selectBtnHtml = `<div style="text-align:center; margin-top:16px; color:#f39c12; font-weight:bold;">Этот сценарий взят вами</div>`;
         }
 
         const card = document.createElement('div');
@@ -229,86 +137,78 @@
           <div class="scenario-body">
             <div class="desc">${s.description || 'Без описания'}</div>
             ${scenesHtml}
+            ${audioHtml}
+            ${selectBtnHtml}
           </div>
         `;
         list.appendChild(card);
       });
     }
 
-    function toggleScenario(header) {
-      const body = header.nextElementSibling;
-      body.classList.toggle('open');
+    async function selectScenario(scenarioId) {
+        if (!userId) { tg.showAlert("Ошибка: не удалось определить ваш ID"); return; }
+        try {
+            const response = await fetch(`${API_URL}/api/select_scenario/${scenarioId}?user_id=${userId}`, { method: 'POST' });
+            const data = await response.json();
+            if (data.success) {
+                tg.showAlert("Сценарий успешно взят в работу!");
+                loadScenarios();
+            } else {
+                tg.showAlert(data.error || "Не удалось взять сценарий");
+                loadScenarios();
+            }
+        } catch (e) { tg.showAlert("Ошибка соединения с сервером"); }
     }
 
-    // Загрузка "Мои ролики"
+    function toggleScenario(header) { header.nextElementSibling.classList.toggle('open'); }
+
     async function loadMyScenarios() {
       if (!userId) return;
       try {
         const response = await fetch(`${API_URL}/api/my_scenarios/${userId}`);
         const data = await response.json();
-        renderMyScenarios(data.scenarios);
-      } catch (e) {
-        document.getElementById('my-list').innerHTML = '<div class="empty">Ошибка загрузки.</div>';
-      }
+        const list = document.getElementById('my-list');
+        if (data.scenarios.length === 0) { list.innerHTML = '<div class="empty">У вас пока нет роликов.</div>'; return; }
+        
+        let html = '';
+        data.scenarios.forEach(s => {
+          const statusClass = s.status === 'completed' ? 'status-completed' : 'status-taken';
+          const statusText = s.status === 'completed' ? 'Завершено' : 'В работе';
+          html += `
+            <div class="scenario-card">
+              <div class="scenario-header" style="cursor:default;">
+                <span>${s.title}</span>
+                <span class="status-badge ${statusClass}">${statusText}</span>
+              </div>
+              <div class="scenario-body open" style="padding-top:12px;">
+                <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>Дата выбора:</span> <span>${s.selected_at}</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>Дата завершения:</span> <span>${s.completed_at}</span></div>
+              </div>
+            </div>
+          `;
+        });
+        list.innerHTML = html;
+      } catch (e) { document.getElementById('my-list').innerHTML = '<div class="empty">Ошибка загрузки.</div>'; }
     }
 
-    function renderMyScenarios(scenarios) {
-      const list = document.getElementById('my-list');
-      if (scenarios.length === 0) {
-        list.innerHTML = '<div class="empty">У вас пока нет роликов.</div>';
-        return;
-      }
-      let html = '';
-      scenarios.forEach(s => {
-        const statusClass = s.status === 'completed' ? 'status-completed' : 'status-taken';
-        const statusText = s.status === 'completed' ? 'Завершено' : 'В работе';
-        html += `
-          <div class="scenario-card">
-            <div class="scenario-header">
-              <span>${s.title}</span>
-              <span class="status-badge ${statusClass}">${statusText}</span>
-            </div>
-            <div class="scenario-body open" style="padding-top:12px;">
-              <div class="info-row"><span>Дата выбора:</span> <span>${s.selected_at}</span></div>
-              <div class="info-row"><span>Дата завершения:</span> <span>${s.completed_at}</span></div>
-            </div>
-          </div>
-        `;
-      });
-      list.innerHTML = html;
-    }
-
-    // Загрузка "Все аниматоры"
     async function loadAllAnimators() {
       try {
         const response = await fetch(`${API_URL}/api/all_animators`);
         const data = await response.json();
         const list = document.getElementById('all-list');
-        if (data.animators.length === 0) {
-          list.innerHTML = '<div class="empty">Пока никто не брал ролики.</div>';
-        } else {
-          let html = '';
-          data.animators.forEach(id => {
-            html += `<div class="scenario-card" style="padding:16px;">Аниматор ID: ${id}</div>`;
-          });
-          list.innerHTML = html;
-        }
-      } catch (e) {
-        document.getElementById('all-list').innerHTML = '<div class="empty">Ошибка загрузки.</div>';
-      }
+        if (data.animators.length === 0) { list.innerHTML = '<div class="empty">Пока никто не брал ролики.</div>'; return; }
+        let html = '';
+        data.animators.forEach(id => { html += `<div class="scenario-card" style="padding:16px;">Аниматор ID: ${id}</div>`; });
+        list.innerHTML = html;
+      } catch (e) { document.getElementById('all-list').innerHTML = '<div class="empty">Ошибка загрузки.</div>'; }
     }
 
-    // Переключение экранов
     function switchScreen(screenName) {
-      // Скрываем все экраны
       document.getElementById('scenarios-screen').style.display = 'none';
       document.getElementById('my-screen').style.display = 'none';
       document.getElementById('all-screen').style.display = 'none';
-      
-      // Убираем активный класс со всех кнопок
       document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
 
-      // Показываем нужный экран и кнопку
       if (screenName === 'scenarios') {
         document.getElementById('scenarios-screen').style.display = 'block';
         document.querySelectorAll('.nav-btn')[0].classList.add('active');
@@ -324,18 +224,9 @@
       }
     }
 
-    // Функции для модального окна
-    function openImage(url) {
-      document.getElementById('modalImage').src = url;
-      document.getElementById('imageModal').classList.add('active');
-    }
+    function openImage(url) { document.getElementById('modalImage').src = url; document.getElementById('imageModal').classList.add('active'); }
+    function closeImage() { document.getElementById('imageModal').classList.remove('active'); document.getElementById('modalImage').src = ''; }
 
-    function closeImage() {
-      document.getElementById('imageModal').classList.remove('active');
-      document.getElementById('modalImage').src = '';
-    }
-
-    // Загружаем сценарии при старте
     loadScenarios();
   </script>
 </body>
