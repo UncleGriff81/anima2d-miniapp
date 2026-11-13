@@ -38,11 +38,9 @@
       font-weight: bold; font-size: 14px; cursor: pointer; text-align: center;
     }
     .btn-select { background: #2ecc71; color: #000; }
-    .btn-select:active { background: #27ae60; }
     .btn-complete { background: #f39c12; color: #000; }
-    .btn-complete:active { background: #e67e22; }
     .btn-cancel { background: #e74c3c; color: #fff; }
-    .btn-cancel:active { background: #c0392b; }
+    .btn-upload { background: #3498db; color: #fff; }
 
     .audio-download-btn {
       display: inline-block; padding: 10px 16px; background: #3498db; color: #fff;
@@ -84,6 +82,8 @@
     tg.ready(); tg.expand();
     const userId = tg.initDataUnsafe?.user?.id;
     const API_URL = "https://anima-bot-production.up.railway.app"; 
+    // ЗАГЛУШКА: Сюда вставь ссылку на сторонний сайт для загрузки работ
+    const UPLOAD_URL = "https://example.com/upload"; 
 
     async function loadScenarios() {
       try {
@@ -132,6 +132,9 @@
                 <button class="action-btn btn-complete" onclick="completeScenario(${s.id})">✅ Завершить</button>
                 <button class="action-btn btn-cancel" onclick="cancelScenario(${s.id})">❌ Отменить</button>
             `;
+        } else if (s.status === 'completed' && s.animator_id === userId) {
+            // Если работа завершена, показываем кнопку "Загрузить"
+            actionBtnHtml = `<button class="action-btn btn-upload" onclick="uploadWork(${s.id})">📤 Загрузить</button>`;
         }
 
         const card = document.createElement('div');
@@ -157,13 +160,8 @@
         try {
             const response = await fetch(`${API_URL}/api/select_scenario/${scenarioId}?user_id=${userId}`, { method: 'POST' });
             const data = await response.json();
-            if (data.success) {
-                tg.showAlert("Сценарий успешно взят в работу!");
-                loadScenarios();
-            } else {
-                tg.showAlert(data.error || "Не удалось взять сценарий");
-                loadScenarios();
-            }
+            if (data.success) { tg.showAlert("Сценарий успешно взят в работу!"); loadScenarios(); }
+            else { tg.showAlert(data.error || "Не удалось взять сценарий"); loadScenarios(); }
         } catch (e) { tg.showAlert("Ошибка соединения с сервером"); }
     }
 
@@ -172,12 +170,8 @@
         try {
             const response = await fetch(`${API_URL}/api/cancel_scenario/${scenarioId}?user_id=${userId}`, { method: 'POST' });
             const data = await response.json();
-            if (data.success) {
-                tg.showAlert("Сценарий отменен.");
-                loadScenarios();
-            } else {
-                tg.showAlert(data.error || "Ошибка отмены");
-            }
+            if (data.success) { tg.showAlert("Сценарий отменен."); loadScenarios(); }
+            else { tg.showAlert(data.error || "Ошибка отмены"); }
         } catch (e) { tg.showAlert("Ошибка соединения с сервером"); }
     }
 
@@ -186,19 +180,21 @@
         try {
             const response = await fetch(`${API_URL}/api/complete_scenario/${scenarioId}?user_id=${userId}`, { method: 'POST' });
             const data = await response.json();
-            if (data.success) {
-                tg.showAlert("Работа завершена!");
-                loadScenarios();
-            } else {
-                tg.showAlert(data.error || "Ошибка завершения");
-            }
+            if (data.success) { tg.showAlert("Работа завершена!"); loadScenarios(); }
+            else { tg.showAlert(data.error || "Ошибка завершения"); }
         } catch (e) { tg.showAlert("Ошибка соединения с сервером"); }
+    }
+
+    function uploadWork(scenarioId) {
+        // Открываем сторонний сайт для загрузки
+        window.open(UPLOAD_URL, '_blank');
+        // Фиксируем факт нажатия
+        fetch(`${API_URL}/api/upload_work/${scenarioId}?work_link=${encodeURIComponent(UPLOAD_URL)}`, { method: 'POST' });
     }
 
     function downloadAudio(fileId) {
         const fileUrl = `${API_URL}/api/audio/${fileId}`;
         const fileName = `audio_${fileId}.mp3`;
-
         if (window.Telegram?.WebApp?.downloadFile) {
             window.Telegram.WebApp.downloadFile({ url: fileUrl, file_name: fileName });
         } else {
@@ -229,6 +225,7 @@
               <div class="scenario-body open" style="padding-top:12px;">
                 <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>Дата выбора:</span> <span>${s.selected_at}</span></div>
                 <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>Дата завершения:</span> <span>${s.completed_at}</span></div>
+                ${s.uploaded_at ? `<div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>Дата загрузки:</span> <span>${s.uploaded_at}</span></div>` : ''}
               </div>
             </div>
           `;
