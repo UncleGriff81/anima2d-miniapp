@@ -33,18 +33,22 @@
     
     .scene-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; margin-top: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
     
-    .select-btn {
-      display: block; width: 100%; padding: 12px; margin-top: 16px; background: #2ecc71; color: #000;
-      border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-align: center;
+    .action-btn {
+      display: block; width: 100%; padding: 12px; margin-top: 8px; border: none; border-radius: 8px; 
+      font-weight: bold; font-size: 14px; cursor: pointer; text-align: center;
     }
-    .select-btn:active { background: #27ae60; }
+    .btn-select { background: #2ecc71; color: #000; }
+    .btn-select:active { background: #27ae60; }
+    .btn-complete { background: #f39c12; color: #000; }
+    .btn-complete:active { background: #e67e22; }
+    .btn-cancel { background: #e74c3c; color: #fff; }
+    .btn-cancel:active { background: #c0392b; }
 
     .audio-download-btn {
       display: inline-block; padding: 10px 16px; background: #3498db; color: #fff;
       border: none; border-radius: 8px; font-weight: bold; font-size: 14px;
       text-align: center; margin-top: 8px; cursor: pointer;
     }
-    .audio-download-btn:active { background: #2980b9; }
 
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.9); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
     .modal-overlay.active { display: flex; }
@@ -79,7 +83,6 @@
     const tg = window.Telegram.WebApp;
     tg.ready(); tg.expand();
     const userId = tg.initDataUnsafe?.user?.id;
-    // ВАЖНО: Твоя ссылка на Railway
     const API_URL = "https://anima-bot-production.up.railway.app"; 
 
     async function loadScenarios() {
@@ -120,11 +123,15 @@
             audioHtml = `<div style="margin-top:16px;"><button onclick="downloadAudio('${s.audio_id}')" class="audio-download-btn">⬇️ Скачать аудио</button></div>`;
         }
 
-        let selectBtnHtml = '';
+        // Логика кнопок
+        let actionBtnHtml = '';
         if (s.status === 'free') {
-            selectBtnHtml = `<button class="select-btn" onclick="selectScenario(${s.id})">✅ Выбрать этот сценарий</button>`;
-        } else if (s.animator_id === userId && s.status === 'taken') {
-            selectBtnHtml = `<div style="text-align:center; margin-top:16px; color:#f39c12; font-weight:bold;">Этот сценарий взят вами</div>`;
+            actionBtnHtml = `<button class="action-btn btn-select" onclick="selectScenario(${s.id})">✅ Выбрать этот сценарий</button>`;
+        } else if (s.status === 'taken' && s.animator_id === userId) {
+            actionBtnHtml = `
+                <button class="action-btn btn-complete" onclick="completeScenario(${s.id})">✅ Завершить</button>
+                <button class="action-btn btn-cancel" onclick="cancelScenario(${s.id})">❌ Отменить</button>
+            `;
         }
 
         const card = document.createElement('div');
@@ -138,7 +145,7 @@
             <div class="desc">${s.description || 'Без описания'}</div>
             ${scenesHtml}
             ${audioHtml}
-            ${selectBtnHtml}
+            ${actionBtnHtml}
           </div>
         `;
         list.appendChild(card);
@@ -160,17 +167,41 @@
         } catch (e) { tg.showAlert("Ошибка соединения с сервером"); }
     }
 
+    async function cancelScenario(scenarioId) {
+        if (!userId) return;
+        try {
+            const response = await fetch(`${API_URL}/api/cancel_scenario/${scenarioId}?user_id=${userId}`, { method: 'POST' });
+            const data = await response.json();
+            if (data.success) {
+                tg.showAlert("Сценарий отменен.");
+                loadScenarios();
+            } else {
+                tg.showAlert(data.error || "Ошибка отмены");
+            }
+        } catch (e) { tg.showAlert("Ошибка соединения с сервером"); }
+    }
+
+    async function completeScenario(scenarioId) {
+        if (!userId) return;
+        try {
+            const response = await fetch(`${API_URL}/api/complete_scenario/${scenarioId}?user_id=${userId}`, { method: 'POST' });
+            const data = await response.json();
+            if (data.success) {
+                tg.showAlert("Работа завершена!");
+                loadScenarios();
+            } else {
+                tg.showAlert(data.error || "Ошибка завершения");
+            }
+        } catch (e) { tg.showAlert("Ошибка соединения с сервером"); }
+    }
+
     function downloadAudio(fileId) {
         const fileUrl = `${API_URL}/api/audio/${fileId}`;
         const fileName = `audio_${fileId}.mp3`;
 
         if (window.Telegram?.WebApp?.downloadFile) {
-            window.Telegram.WebApp.downloadFile({
-                url: fileUrl,
-                file_name: fileName
-            });
+            window.Telegram.WebApp.downloadFile({ url: fileUrl, file_name: fileName });
         } else {
-            // Запасной вариант для старых версий Telegram
             window.open(fileUrl, '_blank');
         }
     }
