@@ -57,6 +57,12 @@
     .nav-btn.active { color: #64b5f6; font-weight: bold; background: rgba(100, 181, 246, 0.1); }
     .empty { text-align: center; color: #7d8b99; margin-top: 20px; }
     .period-header { font-size: 14px; color: #7d8b99; margin: 20px 0 8px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Стили для формы отчёта */
+    .report-form { background: var(--tg-theme-secondary-bg-color, #232e3c); padding: 16px; border-radius: 12px; }
+    .report-form label { display: block; margin-bottom: 8px; font-size: 14px; color: #7d8b99; }
+    .report-form input { width: 100%; padding: 10px; margin-bottom: 16px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff; font-size: 14px; box-sizing: border-box; }
+    .report-form button { width: 100%; padding: 12px; background: #3498db; color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -67,11 +73,21 @@
   </div>
   <div id="my-screen" style="display: none;"><div id="my-list"></div></div>
   <div id="all-screen" style="display: none;"><div id="all-list"></div></div>
+  <div id="report-screen" style="display: none;">
+    <div class="report-form">
+      <label>Начало периода:</label>
+      <input type="date" id="report-start">
+      <label>Конец периода:</label>
+      <input type="date" id="report-end">
+      <button onclick="downloadReport()">📥 Сформировать отчёт</button>
+    </div>
+  </div>
 
   <div class="bottom-nav">
     <button class="nav-btn active" onclick="switchScreen('scenarios')">📚 Сценарии</button>
     <button class="nav-btn" onclick="switchScreen('my')">🎞 Мои ролики</button>
     <button class="nav-btn" onclick="switchScreen('users')">👥 Участники</button>
+    <button class="nav-btn" onclick="switchScreen('report')">📊 Отчёт</button>
   </div>
 
   <div id="imageModal" class="modal-overlay" onclick="closeImage()">
@@ -256,46 +272,4 @@
             
             html += `
                 <div class="scenario-card" style="padding:16px; display:flex; align-items:center; gap:12px;">
-                    <div style="flex-shrink:0;">
-                        <img src="${API_URL}/api/avatar/${u.id}" style="width:48px; height:48px; border-radius:50%; object-fit:cover;" onerror="this.src='https://via.placeholder.com/48?text=👤'">
-                    </div>
-                    <div style="flex-grow:1;">
-                        <div style="font-weight:bold; font-size:15px;">${u.first_name || u.username || 'Без имени'}</div>
-                        <div style="font-size:12px; color:#7d8b99; margin-top:2px;">${roleText}</div>
-                    </div>
-                    ${u.username ? `<a href="https://t.me/${u.username}" target="_blank" style="background:#3498db; color:#fff; text-decoration:none; padding:8px 12px; border-radius:6px; font-size:13px;">Написать</a>` : ''}
-                </div>
-            `;
-        });
-        list.innerHTML = html;
-      } catch (e) { document.getElementById('all-list').innerHTML = '<div class="empty">Ошибка загрузки.</div>'; }
-    }
-
-    function switchScreen(screenName) {
-      document.getElementById('scenarios-screen').style.display = 'none';
-      document.getElementById('my-screen').style.display = 'none';
-      document.getElementById('all-screen').style.display = 'none';
-      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-
-      if (screenName === 'scenarios') {
-        document.getElementById('scenarios-screen').style.display = 'block';
-        document.querySelectorAll('.nav-btn')[0].classList.add('active');
-        loadScenarios();
-      } else if (screenName === 'my') {
-        document.getElementById('my-screen').style.display = 'block';
-        document.querySelectorAll('.nav-btn')[1].classList.add('active');
-        loadMyScenarios();
-      } else if (screenName === 'users') {
-        document.getElementById('all-screen').style.display = 'block';
-        document.querySelectorAll('.nav-btn')[2].classList.add('active');
-        loadUsers();
-      }
-    }
-
-    function openImage(url) { document.getElementById('modalImage').src = url; document.getElementById('imageModal').classList.add('active'); }
-    function closeImage() { document.getElementById('imageModal').classList.remove('active'); document.getElementById('modalImage').src = ''; }
-
-    loadScenarios();
-  </script>
-</body>
-</html>
+                    <div style="flex-shrink:0
