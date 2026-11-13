@@ -272,4 +272,67 @@
             
             html += `
                 <div class="scenario-card" style="padding:16px; display:flex; align-items:center; gap:12px;">
-                    <div style="flex-shrink:0
+                    <div style="flex-shrink:0;">
+                        <img src="${API_URL}/api/avatar/${u.id}" style="width:48px; height:48px; border-radius:50%; object-fit:cover;" onerror="this.src='https://via.placeholder.com/48?text=👤'">
+                    </div>
+                    <div style="flex-grow:1;">
+                        <div style="font-weight:bold; font-size:15px;">${u.first_name || u.username || 'Без имени'}</div>
+                        <div style="font-size:12px; color:#7d8b99; margin-top:2px;">${roleText}</div>
+                    </div>
+                    ${u.username ? `<a href="https://t.me/${u.username}" target="_blank" style="background:#3498db; color:#fff; text-decoration:none; padding:8px 12px; border-radius:6px; font-size:13px;">Написать</a>` : ''}
+                </div>
+            `;
+        });
+        list.innerHTML = html;
+      } catch (e) { document.getElementById('all-list').innerHTML = '<div class="empty">Ошибка загрузки.</div>'; }
+    }
+
+    function downloadReport() {
+        const start = document.getElementById('report-start').value;
+        const end = document.getElementById('report-end').value;
+        
+        if (!start || !end) {
+            tg.showAlert("Выберите начало и конец периода.");
+            return;
+        }
+        
+        const url = `${API_URL}/api/report?start_date=${start}&end_date=${end}`;
+        if (window.Telegram?.WebApp?.downloadFile) {
+            window.Telegram.WebApp.downloadFile({ url: url, file_name: `report_${start}_${end}.pdf` });
+        } else {
+            window.open(url, '_blank');
+        }
+    }
+
+    function switchScreen(screenName) {
+      document.getElementById('scenarios-screen').style.display = 'none';
+      document.getElementById('my-screen').style.display = 'none';
+      document.getElementById('all-screen').style.display = 'none';
+      document.getElementById('report-screen').style.display = 'none';
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+      if (screenName === 'scenarios') {
+        document.getElementById('scenarios-screen').style.display = 'block';
+        document.querySelectorAll('.nav-btn')[0].classList.add('active');
+        loadScenarios();
+      } else if (screenName === 'my') {
+        document.getElementById('my-screen').style.display = 'block';
+        document.querySelectorAll('.nav-btn')[1].classList.add('active');
+        loadMyScenarios();
+      } else if (screenName === 'users') {
+        document.getElementById('all-screen').style.display = 'block';
+        document.querySelectorAll('.nav-btn')[2].classList.add('active');
+        loadUsers();
+      } else if (screenName === 'report') {
+        document.getElementById('report-screen').style.display = 'block';
+        document.querySelectorAll('.nav-btn')[3].classList.add('active');
+      }
+    }
+
+    function openImage(url) { document.getElementById('modalImage').src = url; document.getElementById('imageModal').classList.add('active'); }
+    function closeImage() { document.getElementById('imageModal').classList.remove('active'); document.getElementById('modalImage').src = ''; }
+
+    loadScenarios();
+  </script>
+</body>
+</html>
